@@ -1,0 +1,73 @@
+# Course
+Workflow Management Tool
+
+A 'workflow' contains many 'jobs', which contains many 'tasks'.
+A 'job' has a schedule which determines when it runs.
+Its 'task's have dependencies which are other tasks.
+
+## Graph-Theory Definitions
+A workflow is a directed acyclic graph.
+A job is a subgraph of the workflow that is also a directed acyclic graph.
+A task is represented by a node.
+Dependencies of tasks are represented by edges.
+
+## Notes
+  * Jobs are scheduled, but can also be run manually (or programmatically, or indeed as the success/failure event of another job).
+  * A job is in one of the following states:
+      - new       (job has not been run)
+      - executing (job has begun)
+      - success   (task has completed successfully)
+      - failure   (task has completed unsuccessfully)
+  * Tasks have the following states:
+      - new       (job has not been run)
+      - pending   (job has started, but this task has not (not all it's dependencies have finished))
+      - executing (task has begun)
+      - success   (task has completed successfully)
+      - failure   (task has completed unsuccessfully)
+    Both success and failure repesent the termination of a task, and both can have events associated with them (emails, debugging, etc.).
+    Success of a task, however, propogates to tasks depending on it, and may cause them to run.
+  * 
+
+
+## Objects
+
+    User
+      * name
+      * groups
+      * 
+
+    Workflow
+      * jobs
+      * user_groups
+      * user_group_permissions
+
+    Job
+      * name
+      * description
+      * creator
+      * creation_datetime
+      * current_state
+      * schedule
+      * on_begin_event    (by default this will be logged)
+      * on_success_event  (by default this will be logged)
+      * on_failure_event  (by default this will be logged)
+      * 
+
+    Task
+      * name
+      * description
+      * creator
+      * creation_datetime
+      * current_state
+      * dependencies
+      * dependants
+
+## Roadmap
+  * [ ] Create a job
+      - [ ] Create job with no dependencies.
+      - [ ] Give the job a schedule.
+      - [ ] Add some tasks to the job.
+      - [ ] Manually run the job
+  * [ ] 
+  * [ ] Implement role-based access control
+  * [ ] 

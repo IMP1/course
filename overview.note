@@ -1,33 +1,85 @@
 # Course
 Workflow Management Tool
 
-A 'workflow' contains many 'jobs', which contains many 'tasks'.
-A 'job' has a schedule which determines when it runs.
-Its 'task's have dependencies which are other tasks.
+A 'workflow' contains many 'jobs', which run a 'task'.
+A 'workflow' has a schedule which determines when it runs.
+Its 'jobs's have dependencies which are other tasks.
+An 'operation' is either a 'job' or a 'workflow'.
 
 ## Graph-Theory Definitions
 A workflow is a directed acyclic graph.
-A job is a subgraph of the workflow that is also a directed acyclic graph.
-A task is represented by a node.
-Dependencies of tasks are represented by edges.
+A job is a node of a workflow.
+Dependencies of jobs are represented by edges.
 
 ## Notes
-  * Jobs are scheduled, but can also be run manually (or programmatically, or indeed as the success/failure event of another job).
-  * A job is in one of the following states:
-      - new       (job has not been run)
-      - executing (job has begun)
-      - success   (task has completed successfully)
-      - failure   (task has completed unsuccessfully)
-  * Tasks have the following states:
-      - new       (job has not been run)
-      - pending   (job has started, but this task has not (not all it's dependencies have finished))
-      - executing (task has begun)
-      - success   (task has completed successfully)
-      - failure   (task has completed unsuccessfully)
-    Both success and failure repesent the termination of a task, and both can have events associated with them (emails, debugging, etc.).
-    Success of a task, however, propogates to tasks depending on it, and may cause them to run.
-  * 
+  * Workflows are scheduled, but can also be run manually (or programmatically, or indeed as the success/failure event of another workflow).
+  * A workflow is in one of the following states:
+      - 'new'       (workflow has not been run)
+      - 'executing' (workflow has begun)
+      - 'success'   (workflow has completed successfully)
+      - 'failure'   (workflow has completed unsuccessfully)
+  * Jobs have the following states:
+      - 'new'       (workflow has not been run)
+      - 'pending'   (workflow has started, but this job has not (not all its dependencies have finished))
+      - 'executing' (job has begun)
+      - 'success'   (job has completed successfully)
+      - 'failure'   (job has completed unsuccessfully)
+    Both success and failure repesent the termination of a job, and both can have events associated with them (emails, debugging, etc.).
+    Success of a job, however, propogates to jobs depending on it, and may cause them to run.
+  * History will be kept of past runs of workflows and jobs, with the duration, and the start date(time), and whether it passed/failed.
 
+## What is Course?
+Course is made up of the following:
+ 1. One thread for scheduling and creating threads to execute jobs/tasks
+ 2. One thread for creating jobs/workflows, executing changes to the database, killing jobs/workflows
+    This thread listens for commands on a socket and can handle many connections, each with their own user authorities.
+ 3. One thread for logging
+ 4. One thread for a webserver, creating threads for clients upon connection
+      * Client threads will handle user commands and pass that down to thread 2
+
+The following commands are available:
+ 1. `course init [<username> <password>]`         : sets up the database tables needed to have Course run, and begins a Course instance, which creates the threads listed above. 
+                                                    If a username and password are supplied, these become the admin username and password, and a user is created with all the permissions.
+                                                    If not, then the user is prompted for an admin username and password.
+ 2. `course uninstall -f [<username> <password>]` : Prompts for username and password if not provided. Deletes everything to do with Course.
+ 3. `course login [<username> <password>]`        : Prompts for username and password if not provided. Logs in as user for that connection. 
+                                                    Continues to listen on stdin for further actions, and prints to stdout. 
+                                                    Have a look at http://stackoverflow.com/questions/2110415/how-to-bind-a-windows-console-application-with-java-application for examples of this.
+ 4. `course <action> [<args>]`                    : Enacts one of the following commands. If `login` has not taken place, prompts for username and password. 
+                                                    If `login` *has* taken place, the `course` prefix isn't needed
+     0. `logout`                                          : Logs out the current user, closing the connection.
+     1. `scheduler refresh`                               : Creates a new scheduler and asks the current scheduler to die as soon as it can.
+     2. `scheduler refresh --hard`                        : Creates a new scheduler and kills the current scheduler immediately.
+     3. `user create [<username> <password>]`             : Prompts for username and password if not provided. Adds a new user.
+     4. `role add <username> <user_group>`                : Adds user to user_group. Prompts for login if not logged in. Can fail if insufficient permissions.
+     5. `role create <group_name> [<permission>, ...]`    : Creates a new user group with the specified name and permissions. Can fail if insufficient permissions. Returns the group id.
+     6. `workflow create [<job_name>] [<description>]`    : Creates a new workflow, inserting it into the database, and returns the workflow ID.
+     7. `workflow schedule <job_id> <schedule>`           : Sets the schedule for a workflow.
+     8. `job create <job_id> <task_name>`                 : Creates a new job for the specified workflow, inserting it into the database and returns the job ID.
+     9. `event add <event_type> <operation_type> <action>`: Adds an event to a job/workflow. The type of event (succsess/failure/etc.) is specified by `<event_type>`.
+                                                            An `<operation_type>` is either `-j <job_id>` or `-w <workflow_id>` and an action is an action type, followed by the action text.
+    10. `job set-state <new_state>`                       : Sets the current state of a job manually, regardless of whether its task has succeeded.
+    11. `workflow run <workflow_id> [<job_id>, ...]`      : Manually begins the execution of the specified workflow.
+                                                            If `<job_id>`s are supplied, the workflow begins from jobs part way through. All jobs passed are begun at the same time.
+    12. `workflow kill <workflow_id> <state>`             : Kills a workflow and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
+    13. `job kill <job_id> <state>`                       : Kills a job and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
+    14. 
+
+Spout is the frontend for Course.
+It has a front-end displaying Course details from the database,
+and also handle user input.
+
+
+
+## What does a user need to do?
+  * Create a workflow
+  * Populate that workflow with jobs
+  * Begin the workflow
+  * View the workflow's progress.
+  * Kill a job
+  * Manually set the state of a job
+  * Kill a workflow
+  * Run a workflow from a specific job.
 
 ## Objects
 
@@ -36,10 +88,24 @@ Dependencies of tasks are represented by edges.
       * groups
       * 
 
-    Workflow
-      * jobs
+    Course Instance
+      * workflows
       * user_groups
       * user_group_permissions
+
+    Workflow
+      * name
+      * description
+      * creator
+      * creation_datetime
+      * current_state
+      * schedule
+      * start_datetime
+      * dependencies
+      * active
+      * on_begin_event    (by default it will be logged)
+      * on_success_event  (by default it will be logged)
+      * on_failure_event  (by default it will be logged)
 
     Job
       * name
@@ -47,27 +113,18 @@ Dependencies of tasks are represented by edges.
       * creator
       * creation_datetime
       * current_state
-      * schedule
-      * on_begin_event    (by default this will be logged)
-      * on_success_event  (by default this will be logged)
-      * on_failure_event  (by default this will be logged)
-      * 
-
-    Task
-      * name
-      * description
-      * creator
-      * creation_datetime
-      * current_state
+      * current_start_datetime 
       * dependencies
       * dependants
+      * action
+      * on_begin_event    (by default it will be logged)
+      * on_success_event  (by default it will be logged)
+      * on_failure_event  (by default it will be logged)
+
+    Scheduler
+      * workflow
+      * schedule (from workflow)
+      * 
 
 ## Roadmap
-  * [ ] Create a job
-      - [ ] Create job with no dependencies.
-      - [ ] Give the job a schedule.
-      - [ ] Add some tasks to the job.
-      - [ ] Manually run the job
-  * [ ] 
-  * [ ] Implement role-based access control
   * [ ] 

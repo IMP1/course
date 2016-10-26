@@ -1,15 +1,16 @@
 # Course
 Workflow Management Tool
 
+## Terminology
 A 'workflow' contains many 'jobs', which run a 'task'.
 A 'workflow' has a schedule which determines when it runs.
 Its 'jobs's have dependencies which are other tasks.
-An 'operation' is either a 'job' or a 'workflow'.
 
 ## Graph-Theory Definitions
 A workflow is a directed acyclic graph.
 A job is a node of a workflow.
 Dependencies of jobs are represented by edges.
+    job will be run when ∀e ϵ workflow { target(e) = job | source(e) has finished successfully }
 
 ## Notes
   * Workflows are scheduled, but can also be run manually (or programmatically, or indeed as the success/failure event of another workflow).
@@ -28,65 +29,72 @@ Dependencies of jobs are represented by edges.
     Success of a job, however, propogates to jobs depending on it, and may cause them to run.
   * History will be kept of past runs of workflows and jobs, with the duration, and the start date(time), and whether it passed/failed.
 
+## What does a user need to do?
+  * Create a blank workflow
+  * Populate that workflow with jobs
+  * Give that workflow structure (give the jobs dependencies)
+  * Begin the workflow
+  * View the workflow's progress
+  * Kill a job
+  * Manually set the state of a job
+  * Kill a workflow
+  * Run a workflow starting from a specific job
+  * Add an event to a job (email on failure, for example)
+
 ## What is Course?
 Course is made up of the following:
+ 1. An initialisation process, which creates tables, begins Course running. 
+    It creates two threads, one for logging, and one for scheduling, and gives specific IPs and ports to thesee threads.
+ 2. 
+
  1. One thread for scheduling and creating threads to execute jobs/tasks
- 2. One thread for creating jobs/workflows, executing changes to the database, killing jobs/workflows
-    This thread listens for commands on a socket and can handle many connections, each with their own user authorities.
- 3. One thread for logging
- 4. One thread for a webserver, creating threads for clients upon connection
+ 2. One thread to 
+ 3. Many (or 0) threads for creating jobs/workflows, executing changes to the database, killing jobs/workflows
+    These thread listens for commands on a socket and can handle many connections, each with their own user authorities.
+ 4. One thread for logging
+ 5. One thread for a webserver, creating threads for clients upon connection
       * Client threads will handle user commands and pass that down to thread 2
 
 The following commands are available:
  1. `course init [<username> <password>]`         : sets up the database tables needed to have Course run, and begins a Course instance, which creates the threads listed above. 
                                                     If a username and password are supplied, these become the admin username and password, and a user is created with all the permissions.
                                                     If not, then the user is prompted for an admin username and password.
- 2. `course uninstall -f [<username> <password>]` : Prompts for username and password if not provided. Deletes everything to do with Course.
- 3. `course login [<username> <password>]`        : Prompts for username and password if not provided. Logs in as user for that connection. 
-                                                    Continues to listen on stdin for further actions, and prints to stdout. 
+ 2. `course webserver begin [<ip> [<port]]`       : Starts a webserver at the specified IPs and ports (using defaults if not specified), that allows users to call out to Course using the Spout frontend.
+                                                    This process reads from stdin and prints debugging messages to stdout. It can be closed with `exit`.                                                   
+ 3. `course uninstall -f [<username> <password>]` : Prompts for username and password if not provided. Deletes everything to do with Course.
+ 4. `course login [<username> <password>]`        : Prompts for username and password if not provided (or maybe logs in as guest, asking if they meant that). 
+                                                    Logs in as user for that connection. Continues to listen on stdin for further actions, and prints to stdout. 
                                                     Have a look at http://stackoverflow.com/questions/2110415/how-to-bind-a-windows-console-application-with-java-application for examples of this.
- 4. `course <action> [<args>]`                    : Enacts one of the following commands. If `login` has not taken place, prompts for username and password. 
+ 5. `course <action> [<args>]`                    : Enacts one of the following commands. If `login` has not taken place, prompts for username and password. 
                                                     If `login` *has* taken place, the `course` prefix isn't needed
-     0. `logout`                                          : Logs out the current user, closing the connection.
-     1. `scheduler refresh`                               : Creates a new scheduler and asks the current scheduler to die as soon as it can.
-     2. `scheduler refresh --hard`                        : Creates a new scheduler and kills the current scheduler immediately.
-     3. `user create [<username> <password>]`             : Prompts for username and password if not provided. Adds a new user.
-     4. `role add <username> <user_group>`                : Adds user to user_group. Prompts for login if not logged in. Can fail if insufficient permissions.
-     5. `role create <group_name> [<permission>, ...]`    : Creates a new user group with the specified name and permissions. Can fail if insufficient permissions. Returns the group id.
-     6. `workflow create [<job_name>] [<description>]`    : Creates a new workflow, inserting it into the database, and returns the workflow ID.
-     7. `workflow schedule <job_id> <schedule>`           : Sets the schedule for a workflow.
-     8. `job create <job_id> <task_name>`                 : Creates a new job for the specified workflow, inserting it into the database and returns the job ID.
-     9. `event add <event_type> <operation_type> <action>`: Adds an event to a job/workflow. The type of event (succsess/failure/etc.) is specified by `<event_type>`.
-                                                            An `<operation_type>` is either `-j <job_id>` or `-w <workflow_id>` and an action is an action type, followed by the action text.
-    10. `job set-state <new_state>`                       : Sets the current state of a job manually, regardless of whether its task has succeeded.
-    11. `workflow run <workflow_id> [<job_id>, ...]`      : Manually begins the execution of the specified workflow.
-                                                            If `<job_id>`s are supplied, the workflow begins from jobs part way through. All jobs passed are begun at the same time.
-    12. `workflow kill <workflow_id> <state>`             : Kills a workflow and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
-    13. `job kill <job_id> <state>`                       : Kills a job and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
-    14. 
+     0. `logout`                                              : Logs out the current user, closing the connection.
+     1. `scheduler refresh`                                   : Creates a new scheduler and asks the current scheduler to die as soon as it can.
+     2. `scheduler refresh --hard`                            : Creates a new scheduler and kills the current scheduler immediately.
+     3. `user create [<username> <password>]`                 : Prompts for username and password if not provided. Adds a new user.
+     4. `role add <username> <user_group>`                    : Adds user to user_group. Prompts for login if not logged in. Can fail if insufficient permissions.
+     5. `role create <group_name> [<permission>, ...]`        : Creates a new user group with the specified name and permissions. Can fail if insufficient permissions. Returns the group id.
+     6. `workflow create [<job_name>] [<description>]`        : Creates a new workflow, inserting it into the database, and returns the workflow ID.
+     7. `workflow schedule <job_id> <schedule>`               : Sets the schedule for a workflow.
+     8. `job create <job_id> <task_name>`                     : Creates a new job for the specified workflow, inserting it into the database and returns the job ID.
+     9. `job require <job_id> <dependency_id>`                : Creates a dependency between two jobs.
+    10. `event add <event_type> <operation_type> <action>`    : Adds an event to a job/workflow. The type of event (succsess/failure/etc.) is specified by `<event_type>`.
+                                                                An `<operation_type>` is either `-j <job_id>` or `-w <workflow_id>` and an action is an action type, followed by the action text.
+    11. `job set-state <job_id> <new_state>`                  : Sets the current state of a job manually, regardless of whether its task has succeeded.
+    12. `workflow run <workflow_id> [<job_id>, ...]`          : Manually begins the execution of the specified workflow.
+                                                                If `<job_id>`s are supplied, the workflow begins from jobs part way through. All jobs passed are begun at the same time.
+    13. `workflow end <workflow_id> <state>`                  : Ends a workflow and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
+    14. `job end <job_id> <state>`                            : Ends a job and sets its state to `<state>`. Only 'success' and 'failure' are permitted states.
+    15. `workflow stats <stat_type> <wf_id> [-o <filename>]`  : Returns statistics regarding a workflow. The `<stat_type>` parameter is either ..., 
+                                                                `<wf_id>` is the ID of the workflow. The user can specify a filename for the results to be outputted to (this is recommended).
+                                                                Otherwise they are printed to stdout.
+    16. `job stats <stat_type> <job_id> [-o <filename>]`      : Returns statistics regarding a job. The `<stat_type>` parameter is either ..., 
 
-Spout is the frontend for Course.
-It has a front-end displaying Course details from the database,
-and also handle user input.
-
-
-
-## What does a user need to do?
-  * Create a workflow
-  * Populate that workflow with jobs
-  * Begin the workflow
-  * View the workflow's progress.
-  * Kill a job
-  * Manually set the state of a job
-  * Kill a workflow
-  * Run a workflow from a specific job.
+Spout is the frontend for Course. It has a webpage displaying Course details from the database, and also handle user input, making calls to Course.
 
 ## Objects
-
     User
       * name
       * groups
-      * 
 
     Course Instance
       * workflows
@@ -126,5 +134,16 @@ and also handle user input.
       * schedule (from workflow)
       * 
 
-## Roadmap
-  * [ ] 
+## Tools
+    Language    Pros            Cons 
+    ------------------------------------------------
+    lua         fun             not OOP at all
+    java        easy            big?
+    python      easy?           not great OOP
+    ruby        fun             slow
+    rust        new             unknown
+    C#          good practice   not *completely* cross-platform
+
+## Trello Boards
+    Initial Planning
+    https://trello.com/b/SmeLY2HP/initial-planning

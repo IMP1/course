@@ -1,6 +1,5 @@
 #!usr/bin/ruby
 
-require 'io/console'
 require_relative 'src/course'
 require_relative 'src/course_session'
 require_relative 'src/webserver'
@@ -16,7 +15,10 @@ def course_init()
 end
 
 def course_uninstall()
-
+    if !Course.stop()
+        puts "There was no Course to uninstall."
+    end
+    Course.uninstall()
 end
 
 def course_login()
@@ -76,5 +78,7 @@ begin
         when "begin"
             webserver_begin()
         end
+    else
+        print_usage()
     end
 end

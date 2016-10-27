@@ -3,6 +3,9 @@ require_relative 'protocol'
 
 class SchedulingThread
     SCHEDULER_PORT = 50031
+    KILL_COMMAND  = "die"
+    PING_COMMAND  = "ping"
+    RESET_COMMAND = "refresh"
 
     def initialize()
         @running = false
@@ -25,6 +28,15 @@ class SchedulingThread
         @running = false
     end
 
+    def kill_hard()
+        exit(0)
+    end
+
+    def reset()
+        puts "clean as a whistle."
+        # TODO: Something something...
+    end
+
     def listen_for_instructions()
         server = TCPServer.new(SCHEDULER_PORT)
         while @running
@@ -36,16 +48,28 @@ class SchedulingThread
             msg = Protocol.to_message(Protocol::CONNECTION, "Connected to Course scheduler.")
             client.puts(msg)
             puts "handling instruction" # DEBUG
-            handle_instruction(client, client.gets.chomp)
+            handle_instruction(client, client.gets.chomp.split(" "))
             client.close
         end
     end
 
-    def handle_instruction(client, instruction)
-        case instruction
-        when "die"
-            kill_soft()
-            reply = Protocol.to_message(Protocol::SUCCESS, "")
+    def handle_instruction(client, commands)
+        case commands[0]
+        when PING_COMMAND
+            reply = Protocol.to_message(Protocol::SUCCESS, "pong")
+        when KILL_COMMAND
+            if commands[1] == "hard"
+                kill_hard()
+                reply = Protocol.to_message(Protocol::SUCCESS, "You monster.")
+                puts "Erngh."
+            else
+                kill_soft()
+                reply = Protocol.to_message(Protocol::SUCCESS, "Good night.")
+                puts "Dying gracefully..."
+            end
+        when RESET_COMMAND
+            reset()
+            reply = Protocol.to_message(Protocol::SUCCESS, "refreshed and rejuivinated!")
         end
         client.puts(reply)
     end

@@ -1,45 +1,16 @@
 require 'socket'
 require_relative 'protocol'
+require_relative 'user'
 require_relative 'scheduler'
 
 module Course
-    DEFAULT_ADMIN_USERNAME = "admin"
-    DEFAULT_ADMIN_PASSWORD = "admin"
-
-    def self.create_username()
-        print "Enter an admin username: "
-        username = STDIN.gets.chomp
-        if username.strip.empty?
-            username = DEFAULT_ADMIN_USERNAME
-        end
-        return username
-    end
-
-    def self.create_password()
-        print "Enter an admin password: "
-        password = STDIN.noecho(&:gets).chomp()
-        puts
-        print "Confirm admin password: "
-        confirmation = STDIN.noecho(&:gets).chomp()
-        puts
-        if password == confirmation
-            if password.strip.empty?
-                password = DEFAULT_ADMIN_PASSWORD
-            end
-            return password
-        else
-            puts "\nERROR: Passwords did not match."
-            return create_password()
-        end
-    end
-
-
+    
     def self.setup(admin_username, admin_password)
         if admin_username.nil?
-            admin_username = create_username()
+            admin_username = User.create_username()
         end
         if admin_password.nil?
-            admin_password = create_password()
+            admin_password = User.create_password()
         end
         puts "User set up: #{admin_username.inspect}, with password #{admin_password.inspect}."
     end
@@ -55,15 +26,16 @@ module Course
         s.join()
     end
 
-    def self.running?()
+    def self.send_to_main_proc(message)
         puts "Checking for existing instances..."
         begin
             s = TCPSocket.new('localhost', SchedulingThread::SCHEDULER_PORT)
-            msg = s.gets.chomp
-            if Protocol.connection?(msg)
+            welcome = s.gets.chomp
+            if Protocol.connection?(welcome)
                 puts "Found existing instance."
-                s.puts("\n") # Scheduler is expecting a command.
-                return true
+                s.puts(message)
+                reply = s.gets.chomp
+                return Protocol.success?(reply)
             end
             s.close()
             puts "None found."
@@ -73,6 +45,24 @@ module Course
             puts "None found."
             return false
         end
+    end
+
+    def self.running?()
+        return send_to_main_proc(SchedulingThread::PING_COMMAND)
+    end
+
+    def self.stop()
+        return send_to_main_proc(SchedulingThread::KILL_COMMAND)
+    end
+
+    def self.refresh_scheduler()
+        return send_to_main_proc(SchedulingThread::RESET_COMMAND)
+    end
+
+    def self.uninstall()
+        puts "Deleting local databses..."
+        # TODO come back to this when there are databases to delete
+        puts "Done." 
     end
 
     def self.refresh_scheduler()

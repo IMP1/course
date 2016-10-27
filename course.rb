@@ -2,6 +2,7 @@
 
 require 'io/console'
 require_relative 'src/course'
+require_relative 'src/course_session'
 require_relative 'src/webserver'
 
 #--------------------#
@@ -19,7 +20,15 @@ def course_uninstall()
 end
 
 def course_login()
-
+    if !Course.running?
+        puts "Course needs to be initialised before you can login. Use"
+        puts "\tcourse init"
+        puts "to setup Course."
+    else
+        username = ARGV[1]
+        password = ARGV[2]
+        CourseSession.begin(username, password)
+    end
 end
 
 def webserver_begin()

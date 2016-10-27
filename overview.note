@@ -138,7 +138,7 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
     Language    Pros            Cons 
     ------------------------------------------------
     lua         fun             not OOP at all
-    java        easy            big?
+    java        easy            big? slow?
     python      easy?           not great OOP
     ruby        fun             slow
     rust        new             unknown

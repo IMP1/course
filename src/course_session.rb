@@ -10,7 +10,9 @@ module CourseSession
         end
         puts "Logged in as #{User::current_user}"
         while true
-            handle_command()
+            print "> "
+            command, args = get_command(STDIN.gets.chomp)
+            handle_command(command, args)
         end
     end
 
@@ -21,46 +23,72 @@ module CourseSession
 
     def self.print_help()
         puts "This is still to come. Sorry. I know that's unhelpful."
-    end    
+    end   
 
-    def self.handle_command()
-        print "> "
-        command = STDIN.gets.chomp.split(" ")
-        case command[0]
+    def self.uninstall(hard)
+        if !Course.stop(hard)
+            puts "There was no Course to uninstall."
+        end
+        Course.uninstall()
+        exit(0)
+    end
+
+    def self.get_command(line)
+        if line.is_a?(String)
+            args = line.split(" ")
+        elsif line.is_a?(Array)
+            args = line
+        else
+            raise "this isn't a valid comand. #{line.inspect}"
+        end
+        command = args[0]
+        args = args[1..-1]
+        return command, args
+    end
+
+    def self.handle_command(command, args)
+        case command
         when "help", "?"
             print_help()
         when "logout", "quit", "exit"
             logout()
+        when "uninstall"
+            uninstall(args[0] == "hard")
         when "scheduler"
-            if command[1] == "refresh"
-                Course.refresh_scheduler()
-            else
-                print_usage()
-            end
+            scheduler_command(*get_command(args))
         when "user"
-
+            user_command(*get_command(args))
         when "role"
-
+            role_command(*get_command(args))
         when "workflow"
-
+            workflow_command(*get_command(args))
         when "job"
-            
+            job_command(*get_command(args))
         end
     end
 
-    def self.user_command(args)
+    def self.scheduler_command(command, args)
+        case command
+        when "refresh"
+            Course.refresh_scheduler()
+        else
+            print_usage()
+        end
+    end
+
+    def self.user_command(command, args)
+        puts "User command #{command.inspect} (args = #{args.inspect})."
+    end
+
+    def self.role_command(command, args)
 
     end
 
-    def self.role_command(args)
+    def self.workflow_command(command, args)
 
     end
 
-    def self.workflow_command(args)
-
-    end
-
-    def self.job_command(args)
+    def self.job_command(command, args)
 
     end
 

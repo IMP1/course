@@ -28,9 +28,12 @@ Dependencies of jobs are represented by edges.
     Both success and failure repesent the termination of a job, and both can have events associated with them (emails, debugging, etc.).
     Success of a job, however, propogates to jobs depending on it, and may cause them to run.
   * History will be kept of past runs of workflows and jobs, with the duration, and the start date(time), and whether it passed/failed.
+  * Think about how Job Groups would be implemented. They're workflows themselves, but can be used for reuse, and ease of visibility. Maybe you can just use workflows as tasks in workflows?
+  * Think about where components would be, or have to be. And if they don't have to all be local, think about communication.
+    
 
 ## What does a user need to do?
-  * Create a blank workflow
+  * Create a (blank) workflow
   * Populate that workflow with jobs
   * Give that workflow structure (give the jobs dependencies)
   * Begin the workflow
@@ -91,6 +94,15 @@ The following commands are available:
 
 Spout is the frontend for Course. It has a webpage displaying Course details from the database, and also handle user input, making calls to Course.
 
+## Systems
+
+   Scheduler
+
+   TaskMasters
+
+
+
+
 ## Objects
     User
       * name
@@ -114,6 +126,8 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
       * on_begin_event    (by default it will be logged)
       * on_success_event  (by default it will be logged)
       * on_failure_event  (by default it will be logged)
+
+
 
     Job
       * name
@@ -147,3 +161,7 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
 ## Trello Boards
     Initial Planning
     https://trello.com/b/SmeLY2HP/initial-planning
+
+    START MOVING TO
+
+    https://github.com/IMP1/course/projects/1

@@ -14,8 +14,12 @@ def course_init()
     Course.begin()
 end
 
-def course_uninstall()
-    if !Course.stop()
+def course_uninstall(hard)
+    if !User.login(nil, nil)
+        puts "Invalid credentials"
+        return
+    end
+    if !Course.stop(hard)
         puts "There was no Course to uninstall."
     end
     Course.uninstall()
@@ -64,7 +68,7 @@ begin
     when 'init'
         course_init()
     when 'uninstall'
-        course_uninstall()
+        course_uninstall(ARGV[1] == "hard")
     when 'login'
         course_login()
     when 'webserver'
@@ -73,7 +77,6 @@ begin
             print_usage()
             exit(0)
         end
-
         case webserver_command
         when "begin"
             webserver_begin()

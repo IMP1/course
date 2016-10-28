@@ -45,7 +45,7 @@ class SchedulingThread
             puts "client connected" # DEBUG
             sock_domain, remote_port, remote_hostname, remote_ip = client.peeraddr
             # TODO: handle where data is coming from.
-            msg = Protocol.to_message(Protocol::CONNECTION, "Connected to Course scheduler.")
+            msg = Protocol.to_message(Protocol::CONNECTION_ESTABLISHED, "Connected to Course scheduler.")
             client.puts(msg)
             puts "handling instruction" # DEBUG
             handle_instruction(client, client.gets.chomp.split(" "))
@@ -56,20 +56,20 @@ class SchedulingThread
     def handle_instruction(client, commands)
         case commands[0]
         when PING_COMMAND
-            reply = Protocol.to_message(Protocol::SUCCESS, "pong")
+            reply = Protocol.to_message(Protocol::COMMAND_EXECUTED, "pong")
         when KILL_COMMAND
             if commands[1] == "hard"
-                kill_hard()
-                reply = Protocol.to_message(Protocol::SUCCESS, "You monster.")
+                reply = Protocol.to_message(Protocol::COMMAND_EXECUTED, "You monster.")
                 puts "Erngh."
+                kill_hard()
             else
-                kill_soft()
-                reply = Protocol.to_message(Protocol::SUCCESS, "Good night.")
+                reply = Protocol.to_message(Protocol::COMMAND_EXECUTED, "Good night.")
                 puts "Dying gracefully..."
+                kill_soft()
             end
         when RESET_COMMAND
             reset()
-            reply = Protocol.to_message(Protocol::SUCCESS, "refreshed and rejuivinated!")
+            reply = Protocol.to_message(Protocol::COMMAND_EXECUTED, "refreshed and rejuivinated!")
         end
         client.puts(reply)
     end

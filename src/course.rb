@@ -26,14 +26,14 @@ module Course
         s.join()
     end
 
-    def self.send_to_main_proc(message)
+    def self.send_to_main_proc(*message)
         puts "Checking for existing instances..."
         begin
             s = TCPSocket.new('localhost', SchedulingThread::SCHEDULER_PORT)
             welcome = s.gets.chomp
             if Protocol.connection?(welcome)
                 puts "Found existing instance."
-                s.puts(message)
+                s.puts(message.join(" "))
                 reply = s.gets.chomp
                 return Protocol.success?(reply)
             end
@@ -51,11 +51,12 @@ module Course
         return send_to_main_proc(SchedulingThread::PING_COMMAND)
     end
 
-    def self.stop()
-        return send_to_main_proc(SchedulingThread::KILL_COMMAND)
+    def self.stop(hard=false)
+        return send_to_main_proc(SchedulingThread::KILL_COMMAND, hard ? "hard" : nil)
     end
 
     def self.refresh_scheduler()
+        puts "sending refresh command..."
         return send_to_main_proc(SchedulingThread::RESET_COMMAND)
     end
 
@@ -65,11 +66,6 @@ module Course
         puts "Done." 
     end
 
-    def self.refresh_scheduler()
-        if running?()
-
-        end
-    end
-
 end
 
+puts "Course commands loaded."

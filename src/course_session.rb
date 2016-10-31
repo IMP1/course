@@ -77,19 +77,59 @@ module CourseSession
     end
 
     def self.user_command(command, args)
-        puts "User command #{command.inspect} (args = #{args.inspect})."
+        case command
+        when "create"
+
+        else
+            print_usage()
+        end
     end
 
     def self.role_command(command, args)
+        case command
+        when "create"
 
+        when "add"
+
+        else
+            print_usage()
+        end
     end
 
     def self.workflow_command(command, args)
+        case command
+        when "create"
 
+        when "schedule"
+
+        when "set-state"
+
+        when "stats"
+
+        when "event"
+
+        else
+            print_usage()
+        end
     end
 
     def self.job_command(command, args)
+        case command
+        when "create"
 
+        when "require"
+
+        when "run"
+
+        when "set-state"
+
+        when "stats"
+            
+        when "event"
+
+        else
+            print_usage()
+        end 
     end
 
 end

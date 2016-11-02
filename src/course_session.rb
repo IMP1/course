@@ -1,5 +1,27 @@
+require 'io/console'
 require_relative 'user'
 require_relative 'course'
+
+def read_char
+    #
+    # TODO: Have a look at https://h3rald.com/articles/inline-introduction/
+    #       Install it and see how good it is.
+    #
+    input = ""
+    STDIN.noecho do |stdin_noecho|
+        stdin_noecho.raw do |io|
+            input = io.getch.chr
+        end
+    end
+    if input == "\e" then
+        input << STDIN.read_nonblock(3) rescue nil
+        input << STDIN.read_nonblock(2) rescue nil
+    end
+ensure
+    # STDIN.echo = true
+    STDIN.cooked!
+    return input
+end
 
 module CourseSession
 
@@ -9,9 +31,14 @@ module CourseSession
             return
         end
         puts "Logged in as #{User::current_user}"
+        command_history = []
+        puts STDIN.winsize # DEBUG
         while true
             print "> "
-            command, args = get_command(STDIN.gets.chomp)
+            # TODO: Check for arrow keys and stuff
+            line = STDIN.gets.chomp
+            command_history.push(line)
+            command, args = get_command(line)
             handle_command(command, args)
         end
     end
@@ -64,6 +91,8 @@ module CourseSession
             workflow_command(*get_command(args))
         when "job"
             job_command(*get_command(args))
+        else
+            print_usage()
         end
     end
 

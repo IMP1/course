@@ -55,6 +55,7 @@ module CourseSession
     def self.uninstall(hard)
         if !Course.stop(hard)
             puts "There was no Course to uninstall."
+            return
         end
         Course.uninstall()
         exit(0)

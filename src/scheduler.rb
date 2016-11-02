@@ -42,14 +42,18 @@ class SchedulingThread
         while @running
             puts "Scheduler listening for instructions" # DEBUG
             client = server.accept()
-            puts "client connected" # DEBUG
-            sock_domain, remote_port, remote_hostname, remote_ip = client.peeraddr
-            # TODO: handle where data is coming from.
-            msg = Protocol.to_message(Protocol::CONNECTION_ESTABLISHED, "Connected to Course scheduler.")
-            client.puts(msg)
-            puts "handling instruction" # DEBUG
-            handle_instruction(client, client.gets.chomp.split(" "))
-            client.close
+            Thread.new {
+                puts "client connected" # DEBUG
+                sock_domain, remote_port, remote_hostname, remote_ip = client.peeraddr
+                # TODO: handle where data is coming from.
+                msg = Protocol.to_message(Protocol::CONNECTION_ESTABLISHED, "Connected to Course scheduler.")
+                client.puts(msg)
+                puts "after connection"
+                sleep(10)
+                puts "handling instruction" # DEBUG
+                handle_instruction(client, client.gets.chomp.split(" "))
+                client.close
+            }
         end
     end
 

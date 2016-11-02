@@ -1,6 +1,12 @@
 require 'io/console'
 
 module User
+
+    ROLES = {
+        :ADMIN => "admin",
+        :USER  => "user",
+    }
+
     DEFAULT_ADMIN_USERNAME = "admin"
     DEFAULT_ADMIN_PASSWORD = "admin"
     PASSWORD_ATTEMPTS = 5

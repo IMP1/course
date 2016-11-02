@@ -98,7 +98,9 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
 
    Scheduler
 
-   TaskMasters
+   Executors
+
+   Webserver + Website
 
 
 
@@ -127,8 +129,6 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
       * on_success_event  (by default it will be logged)
       * on_failure_event  (by default it will be logged)
 
-
-
     Job
       * name
       * description
@@ -148,20 +148,8 @@ Spout is the frontend for Course. It has a webpage displaying Course details fro
       * schedule (from workflow)
       * 
 
-## Tools
-    Language    Pros            Cons 
-    ------------------------------------------------
-    lua         fun             not OOP at all
-    java        easy            big? slow?
-    python      easy?           not great OOP
-    ruby        fun             slow
-    rust        new             unknown
-    C#          good practice   not *completely* cross-platform
-
-## Trello Boards
-    Initial Planning
-    https://trello.com/b/SmeLY2HP/initial-planning
-
-    START MOVING TO
-
-    https://github.com/IMP1/course/projects/1
+## Tables
+    Job
+        * is_workflow?
+        * parent
+        

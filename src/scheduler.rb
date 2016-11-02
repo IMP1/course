@@ -13,9 +13,7 @@ class SchedulingThread
 
     def run()
         @running = true
-        Thread.new {
-            listen_for_instructions()
-        }
+        Thread.new { listen_for_instructions() }
         while (@running)
             # TODO: check workflows' schedules
             # TODO: create threads to run workflows when needed
@@ -42,18 +40,17 @@ class SchedulingThread
         while @running
             puts "Scheduler listening for instructions" # DEBUG
             client = server.accept()
-            Thread.new {
+            Thread.new do
                 puts "client connected" # DEBUG
                 sock_domain, remote_port, remote_hostname, remote_ip = client.peeraddr
                 # TODO: handle where data is coming from.
                 msg = Protocol.to_message(Protocol::CONNECTION_ESTABLISHED, "Connected to Course scheduler.")
                 client.puts(msg)
-                puts "after connection"
-                sleep(10)
+                puts "after connection" # DEBUG
                 puts "handling instruction" # DEBUG
                 handle_instruction(client, client.gets.chomp.split(" "))
                 client.close
-            }
+            end
         end
     end
 

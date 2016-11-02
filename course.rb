@@ -37,14 +37,12 @@ def course_login()
     end
 end
 
-def webserver_begin()
+def webserver_begin(ip, port)
     if !Course.running?
         puts "Course needs to be initialised before the webserver can begin. Use"
         puts "\tcourse init"
         puts "to setup Course."
     else
-        ip = ARGV[2]
-        port = ARGV[3]
         Webserver.begin(ip, port)
     end
 end
@@ -79,7 +77,7 @@ begin
         end
         case webserver_command
         when "begin"
-            webserver_begin()
+            webserver_begin(ARGV[2], ARGV[3])
         end
     else
         print_usage()

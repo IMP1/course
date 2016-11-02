@@ -2,6 +2,7 @@ require 'socket'
 require_relative 'protocol'
 require_relative 'user'
 require_relative 'scheduler'
+require_relative 'database'
 
 module Course
     
@@ -13,6 +14,7 @@ module Course
             admin_password = User.create_password()
         end
         puts "User set up: #{admin_username.inspect}, with password #{admin_password.inspect}."
+        CourseDatabase.install()
     end
 
     def self.begin()
@@ -61,7 +63,8 @@ module Course
     end
 
     def self.uninstall()
-        puts "Deleting local databses..."
+        puts "Uninstalling..."
+        CourseDatabase.uninstall()
         # TODO come back to this when there are databases to delete
         puts "Done." 
     end

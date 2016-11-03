@@ -8,7 +8,8 @@ class Task
                     retry_delay=0, 
                     on_success_callback=nil, 
                     on_failure_callback=nil, 
-                    on_begin_callback=nil)
+                    on_begin_callback=nil,
+                    *args)
         @run_id              = run_id
         @job_id              = job_id
         @workflow_id         = workflow_id
@@ -21,6 +22,13 @@ class Task
         @timeout_thread      = nil
         @running             = false
         @result              = nil
+        setup_task(*args)
+    end
+
+    def setup_task(*args)
+        #-------------------------------#
+        # SUBCLASSES WILL OVERRIDE THIS #
+        #-------------------------------#
     end
 
     def execute

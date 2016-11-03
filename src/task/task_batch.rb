@@ -1,4 +1,4 @@
-
+require_relative 'task'
 
 class BatchTask < Task
 
@@ -7,14 +7,9 @@ class BatchTask < Task
         @batch_filename = batch_filename
     end
 
-    def execute
+    def run_task
         super
-        result = system(@batch_filename)
-        if result
-            on_success
-        else
-            on_failure
-        end
+        @result = system(@batch_filename)
     end
 
 end

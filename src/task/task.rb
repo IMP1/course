@@ -1,5 +1,3 @@
-
-
 class Task
 
     def initialize(run_id,
@@ -22,37 +20,51 @@ class Task
         @on_failure_callback = on_failure_callback
         @timeout_thread      = nil
         @running             = false
+        @result              = nil
     end
 
     def execute
         @running = true
         @on_begin_callback.call()
-        if @timeout_thread != nil
-            Thread.new { timeout_thread }
+        if @execution_timeout != nil
+            start_timeout_thread()
+        end
+        run_task()
+        if @result.nil?
+            puts "Result variable has not been set..."
+        else
+            finish(@result)
         end
     end
 
-    def finish
+    def run_task
+        #-------------------------------#
+        # SUBCLASSES WILL OVERRIDE THIS #
+        #-------------------------------#
+    end
+
+    def finish(success, message="")
+        if !@timeout_thread.nil?
+            @timeout_thread.terminate
+        end
         @running = false
+        if success
+            @on_success_callback.call()
+        else
+            @on_failure_callback.call()
+        end
     end
 
-    def on_success
-        finish
-        @on_success_callback.call()
-    end
-
-    def on_failure(message="")
-        finish
-        @on_failure_callback.call()
-    end
-
-    def timeout_thread
-        # setup ...
-        while (@running)
-            # handle timer ...
-            # if timer > @execution_timeout
-            #     on_failure("Execution timed out #{timer}")
-            # end
+    def start_timeout_thread
+        @timeout_thread = Thread.new do 
+            # SETUP
+            # get current timer
+            while (@running)
+                # handle timer ...
+                # if timer > @execution_timeout
+                #     finish(false, "Execution timed out #{timer}")
+                # end
+            end    
         end
     end
 

@@ -21,7 +21,7 @@ Dependencies of jobs are represented by edges.
       - 'failure'   (workflow has completed unsuccessfully)
   * Jobs have the following states:
       - 'new'       (workflow has not been run)
-      - 'pending'   (workflow has started, but this job has not (not all its dependencies have finished))
+      - 'pending'   (workflow has started, but this job has not (not all its dependencies have finished)) !!! Maybe this should be derived?
       - 'executing' (job has begun)
       - 'success'   (job has completed successfully)
       - 'failure'   (job has completed unsuccessfully)

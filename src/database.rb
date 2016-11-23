@@ -1,13 +1,14 @@
 require 'rubygems'
 require 'sequel'
 
-DB = Sequel.sqlite # Change to something proper and scalable at some point.
+DB = Sequel.sqlite('./course.db') # Change to something proper and scalable at some point.
 
 module CourseDatabase
 
     def self.install(admin_username, admin_password)
         setup_tables()
-        create_user(username, password, User::ROLES[:ADMIN])
+        create_user(admin_username, admin_password, User::ROLES[:ADMIN])
+        create_user("test", "password")
         puts "Databases installed."
     end
 
@@ -31,11 +32,10 @@ module CourseDatabase
         end
     end
 
-    def self.create_user(username, password, role_name)
-        foo = DB[:users].insert(:user_name => username, :user_password => password)
-        puts "Is #{foo} a user ID? I hope so."
-        role_id = DB[:roles].where(:role_name => role_name).first
-        DB[:user_roles].insert(:user_id => foo, :role_id => role_id)
+    def self.create_user(username, password, role_name=User::ROLES[:USER])
+        new_user_id = DB[:users].insert(:user_name => username, :user_password => password)
+        role = DB[:roles].where(:role_name => role_name).first
+        DB[:user_roles].insert(:user_id => new_user_id, :role_id => role[:role_id])
     end
 
     def self.uninstall()

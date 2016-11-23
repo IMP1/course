@@ -14,7 +14,7 @@ module Course
             admin_password = User.create_password()
         end
         puts "User set up: #{admin_username.inspect}, with password #{admin_password.inspect}."
-        CourseDatabase.install()
+        CourseDatabase.install(admin_username, admin_password)
     end
 
     def self.begin()

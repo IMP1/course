@@ -19,10 +19,10 @@ These workflows may or may not have a schedule and also run independantly as the
 
 Workflows and Jobs, at any given time, are in one of the following states:
 
- - `new`:       (workflow has not been run)
- - `executing`: (workflow has begun)
- - `success`:   (workflow has completed successfully)
- - `failure`:   (workflow has completed unsuccessfully)
+ - `new`        (workflow has not been run)
+ - `executing`  (workflow has begun)
+ - `success`    (workflow has completed successfully)
+ - `failure`    (workflow has completed unsuccessfully)
 
 Both success and failure repesent the termination of a job/workflow, and both can have events associated with them (emails, debugging, etc.).
 Success of a job/workflow, however, propogates to jobs/workflows depending on it, and may cause them to run.

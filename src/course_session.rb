@@ -1,6 +1,9 @@
 require 'io/console'
 require_relative 'user'
-require_relative 'course'
+require_relative 'course_process'
+
+require_relative 'log'
+
 
 def read_char
     #
@@ -25,32 +28,20 @@ end
 
 module CourseSession
 
-    def self.begin(username, password)
-        if !User.login(username, password)
-            puts "Invalid credentials"
-            return
-        end
-        puts "Logged in as #{User::current_user}"
-        command_history = []
-        puts STDIN.winsize # DEBUG
-        while true
-            print "> "
-            # TODO: Check for arrow keys and stuff
-            line = STDIN.gets.chomp
-            command_history.push(line)
-            command, args = get_command(line)
-            handle_command(command, args)
-        end
-    end
+    @@logger = Logger.new("Course Session")
+
+    #--------------------#
+    # Available Commands #
+    #--------------------#
+
+    def self.print_help()
+        puts "This is still to come. Sorry. I know that's unhelpful."
+    end   
 
     def self.logout()
         puts "logging out..."
         exit(0)
     end
-
-    def self.print_help()
-        puts "This is still to come. Sorry. I know that's unhelpful."
-    end   
 
     def self.uninstall(hard)
         if !Course.stop(hard)
@@ -61,12 +52,34 @@ module CourseSession
         exit(0)
     end
 
+    #--------------#
+    # Main Process #
+    #--------------#
+
+    def self.begin(username, password)
+        if !User.login(username, password)
+            puts "Invalid credentials"
+            return
+        end
+        puts "Logged in as #{User::current_user}"
+        command_history = []
+        while true
+            print "> "
+            # TODO: Check for arrow keys and stuff
+            line = STDIN.gets.chomp
+            command_history.push(line)
+            command, args = get_command(line)
+            handle_command(command, args)
+        end
+    end
+
     def self.get_command(line)
         if line.is_a?(String)
             args = line.split(" ")
         elsif line.is_a?(Array)
             args = line
         else
+            @@logger.error "#{line.inspect} is not a valid command."
             raise "this isn't a valid comand. #{line.inspect}"
         end
         command = args[0]

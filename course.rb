@@ -1,21 +1,20 @@
-#!usr/bin/ruby
+#!usr/bin/ruby2.3
 
-require_relative 'src/course'
+require_relative 'src/course_process'
 require_relative 'src/course_session'
-require_relative 'src/webserver'
 
 #--------------------#
 # Available Commands #
 #--------------------#
-def course_init()
+def init()
     username = ARGV[1]
     password = ARGV[2]
     Course.setup(username, password)
     Course.begin()
 end
 
-def course_uninstall(hard)
-    if !User.login(nil, nil)
+def uninstall(hard)
+    if !User.login()
         puts "Invalid credentials"
         return
     end
@@ -25,7 +24,7 @@ def course_uninstall(hard)
     Course.uninstall()
 end
 
-def course_login()
+def login()
     if !Course.running?
         puts "Course needs to be initialised before you can login. Use"
         puts "\tcourse init"
@@ -37,18 +36,17 @@ def course_login()
     end
 end
 
-def webserver_begin(ip, port)
-    if !Course.running?
-        puts "Course needs to be initialised before the webserver can begin. Use"
-        puts "\tcourse init"
-        puts "to setup Course."
-    else
-        Webserver.begin(ip, port)
-    end
-end
-
 def print_usage()
-    puts "Usage:..."
+    puts "usage: course <command> [args]"
+    puts
+    puts "Available Commands:"
+    puts
+    puts "Install and setup Course"
+    puts "   init [username [password]]"
+    puts "Uninstall Course"
+    puts "   uninstall"
+    puts "Login to Course"
+    puts "   login [username [password]]"
 end
 
 #--------------#
@@ -64,21 +62,11 @@ begin
 
     case command
     when 'init'
-        course_init()
+        init()
     when 'uninstall'
-        course_uninstall(ARGV[1] == "hard")
+        uninstall(ARGV[1] == "hard")
     when 'login'
-        course_login()
-    when 'webserver'
-        webserver_command = ARGV[1]
-        if webserver_command.nil?
-            print_usage()
-            exit(0)
-        end
-        case webserver_command
-        when "begin"
-            webserver_begin(ARGV[2], ARGV[3])
-        end
+        login()
     else
         print_usage()
     end

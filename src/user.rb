@@ -51,7 +51,7 @@ module User
     def self.try_password(password, username)
         if password.nil?
             print "Enter your password: "
-            password = STDIN.noecho(&:gets).chomp()
+            password = STDIN.noecho(&:gets).chomp
             puts
         end
         return correct_password?(username, password)
@@ -70,7 +70,7 @@ module User
         return username
     end
 
-    def self.login(username, password)
+    def self.login(username=nil, password=nil)
         username = get_username(username)
         password_attempts = PASSWORD_ATTEMPTS
         while password_attempts > 0
